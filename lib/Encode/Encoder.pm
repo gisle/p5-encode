@@ -19,6 +19,7 @@ sub new {
     my ( $class, $data, $encname ) = @_;
     unless ($encname) {
         $encname = Encode::is_utf8($data) ? 'utf8' : '';
+	utf8::encode($data) if $encname;
     }
     else {
         my $obj = find_encoding($encname)

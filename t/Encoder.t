@@ -13,7 +13,7 @@ BEGIN {
 
 use strict;
 #use Test::More 'no_plan';
-use Test::More tests => 516;
+use Test::More tests => 518;
 use Encode::Encoder qw(encoder);
 use MIME::Base64;
 package Encode::Base64;
@@ -28,6 +28,22 @@ sub decode{
     my ($obj, $data) = @_;
     return decode_base64($data);
 }
+
+package Encode::noop;
+
+use parent 'Encode::Encoding';
+__PACKAGE__->Define('noop');
+
+sub encode{
+    my ($obj, $data) = @_;
+    return $data;
+}
+
+sub decode{
+    my ($obj, $data) = @_;
+    return $data;
+}
+
 
 package main;
 
@@ -44,6 +60,17 @@ for my $i (0..255){
     my $base64 = encode_base64($data);
     is(encoder($data)->base64, $base64, "encode");
     is(encoder($base64)->bytes('base64'), $data, "decode");
+}
+
+my $a = chr 163;
+my $b = $a . chr 256;
+chop $b;
+
+for my $in ($a, $b) {
+   my $e = encoder($in);
+   printf "# Encoding is '%s'\n", $e->encoding;
+   my $out = $e->noop();
+   is($in, $out);
 }
 
 1;
